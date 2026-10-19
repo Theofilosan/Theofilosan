@@ -1,16 +1,16 @@
-## Hi there 👋
+# Hi, I'm Theo
 
-<!--
-**Theofilosan/Theofilosan** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+Platform and cloud engineer based in Copenhagen. I spent several years building infrastructure for data teams: Terraform, GitHub Actions, AWS and Azure, and Databricks. I'm now moving toward data and analytics engineering.
 
-Here are some ideas to get you started:
+## What I'm working on
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+- [football-analytics-dbt](https://github.com/Theofilosan/football-analytics-dbt): StatsBomb open data, DuckDB, dbt, Evidence dashboard
+- [shipment-analytics](https://github.com/Theofilosan/shipment-analytics): synthetic shipment data, DuckDB, dbt, Airflow
+
+## Tools
+
+Terraform, GitHub Actions, Azure, AWS, Databricks, Python, SQL, dbt, DuckDB, Airflow
+
+## Elsewhere
+
+[Portfolio and CV](https://theofilosan.github.io)
