@@ -1,0 +1,65 @@
+# Refreshes the terminal profile card (dark_mode.svg / light_mode.svg).
+#
+# fetch_stats.py pulls the public GitHub numbers into cache/stats.json,
+# build_card.py regenerates both card SVGs from assets/ascii-art.txt plus
+# that cache, and build_links.py rebuilds the buttons in the same palette.
+name: Update profile card
+
+on:
+  schedule:
+    - cron: "17 4 * * *"
+
+  workflow_dispatch:
+
+  # Rebuild when the art or the generators change -- not on every push.
+  push:
+    branches: [main]
+    paths:
+      - "assets/**"
+      - "tools/**"
+      - ".github/workflows/profile-card.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: profile-card
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch GitHub stats
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python tools/fetch_stats.py
+
+      - name: Rebuild the card
+        run: python tools/build_card.py
+
+      - name: Rebuild the link buttons
+        run: python tools/build_links.py
+
+      # The card is a deterministic build output, so replaying it on top of
+      # anything that landed mid-run is always safe.
+      - name: Rebase onto any commits that landed meanwhile
+        run: git pull --rebase --autostash origin main
+
+      - name: Commit the regenerated card
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: refresh profile card stats"
+          branch: main
+          file_pattern: "*.svg cache/*.json"
