@@ -6,12 +6,10 @@ stats from cache/stats.json, and a blinking prompt cursor at the bottom.
 Run fetch_stats.py first. Pure stdlib, deterministic output.
 """
 import html
-import json
 import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 ART = (ROOT / "assets" / "ascii-art.txt").read_text().splitlines()
-STATS = json.loads((ROOT / "cache" / "stats.json").read_text())
 
 FONT = 13
 LINE = 17
@@ -20,38 +18,31 @@ PAD = 24
 ART_W = 340  # right column starts after this
 VALUE_X = 610  # where field values begin
 
-# Squirtle pixel sprite: blue rounded bald head, big eyes, cream belly,
-# brown shell rim, curled blue tail. Original drawing, one char per pixel.
-SPRITE = """........oooooo........
-......oobbbbbboo......
-.....obbbbbbbbbbo.....
-....obbbbbbbbbbbbo....
-...obbbbwebbbwebbbbo..
-...obbbbeebbbeeebbo...
-....obbbbbbbbbbbbo....
-....obbbeeeeebbbo.....
-.....oobbbbbbboo......
-..oaasssssssssssaao...
-.oaascccccccccccsaao..
-..oscccccccccccccso...
-..oscccccccccccso.tt..
-..oscccccccccccso.twt.
-...oscccccccccsostt...
-....ossssssssso.......
-.....bb......bb.......
-....obbo....obbo......""".splitlines()
-
-SPRITE_PAL = {
-    "o": "#17344d",  # outline
-    "b": "#5cc0f0",  # squirtle blue
-    "e": "#12242f",  # eyes / mouth
-    "w": "#ffffff",  # eye shine
-    "s": "#a8642f",  # shell brown
-    "c": "#f8ecc9",  # cream belly
-    "a": "#5cc0f0",  # arms
-    "t": "#5cc0f0",  # tail
-}
-SPRITE_PX = 9
+# ASCII portrait generated from his GitHub profile photo (luminance-mapped,
+# subject dense / background empty). Static snapshot - update by re-running
+# the conversion if the avatar changes.
+PORTRAIT = """         ..::::------:.
+       .::. ...:::::----:    -.
+      -:.  ..:-------:::-=-+%-
+     =:...:::-------::--+%@@.
+:=+=++--:::--:::::::==::@@#+.
+  -*@@@@%##=--+--=*%@. +@*=+=
+    ==*@@@@  +%+@@@@+  #=-++=
+    =::-=##  %*#@**%-.--:++*:
+    .+-::::--%+=:.:----=++++-.
+     .+====--==---:-==+++++.++=-
+      .**+++++++++=+++=:-++=:++==
+     :--=+-:-+*+==++=:.::=+*-.*++:
+    .-::-=:==-::-++-.:::-++=+ ++==.-::
+    :::::++-:-=++=:::--=++=+=:*=-+*+-:
+     +==--==++=-::---=+++===.++=-+*==-
+    .=-+++=---====+++++=---=.=*+=++=*+
+    .- .--....-----::==----=-.*++*+*=:
+     -.:.     :. . .:-=+====+:++*++*=-
+     -=..    .:::::--==-::::-+*#*=+**+""".splitlines()
+PORTRAIT_FONT = 10.5
+PORTRAIT_LINE = 13
+PORTRAIT_CHAR = 6.3
 
 
 IDENTITY = [
@@ -94,20 +85,6 @@ def esc(text):
     return html.escape(str(text), quote=True)
 
 
-def stat_rows():
-    left = [("Repos", STATS["repos"])]
-    right = []
-    if STATS.get("commits_year") is not None:
-        left.append(("Commits 1y", STATS["commits_year"]))
-    if STATS.get("contributions_year") is not None:
-        right.append(("Contribs 1y", STATS["contributions_year"]))
-    rows = []
-    for i in range(max(len(left), len(right), 1)):
-        rows.append((left[i] if i < len(left) else None,
-                     right[i] if i < len(right) else None))
-    return rows
-
-
 def field(y, key, value, theme, x=ART_W + 30, vx=VALUE_X):
     dots = "." * max(2, int((vx - x - (len(key) + 2) * CHAR) / CHAR))
     return (
@@ -132,22 +109,19 @@ def render(theme_name):
     rows.append(("contact", None))
     rows += [("field", f) for f in CONTACT]
     rows.append(("blank", None))
-    rows.append(("stats", None))
-    rows += [("statline", s) for s in stat_rows()]
     rows.append(("blank", None))
     rows.append(("prompt", None))
 
-    height = PAD * 2 + LINE * len(rows) + 6
     width = 894
     out = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="@HEIGHT@" '
         f'font-family="\'IBM Plex Mono\',Consolas,Menlo,monospace" font-size="{FONT}" role="img" '
         f'aria-label="Theo Anastasiadis - Platform and Cloud Engineer, Copenhagen">',
         "<style>",
         f".key{{fill:{t['key']};}} .value{{fill:{t['value']};}} .head{{fill:{t['head']};font-weight:bold;}}",
         f".dots{{fill:{t['dots']};}} .muted{{fill:{t['muted']};}} text{{white-space:pre;}}",
         "</style>",
-        f'<rect width="{width}" height="{height}" fill="{t["bg"]}" rx="14" stroke="{t["border"]}"/>',
+        f'<rect width="{width}" height="@HEIGHT@" fill="{t["bg"]}" rx="14" stroke="{t["border"]}"/>',
     ]
 
     # THEO wordmark: text lines with the palette gradient, then the
@@ -160,24 +134,19 @@ def render(theme_name):
     art.append("</text>")
     out.append("".join(art))
 
+    pw_w = max(len(l) for l in PORTRAIT) * PORTRAIT_CHAR
     wm_w = max(len(l) for l in wordmark) * CHAR
-    sp_w = max(len(l) for l in SPRITE) * SPRITE_PX
-    sp_x = PAD + max(0, int((wm_w - sp_w) / 2))
-    sp_y = PAD + 13 + len(wordmark) * LINE + 6
-    rects = ['<g shape-rendering="crispEdges">']
-    for sy, line in enumerate(SPRITE):
-        for sx, ch in enumerate(line):
-            color = SPRITE_PAL.get(ch)
-            if color:
-                rects.append(
-                    f'<rect x="{sp_x + sx * SPRITE_PX}" y="{sp_y + sy * SPRITE_PX}" '
-                    f'width="{SPRITE_PX}" height="{SPRITE_PX}" fill="{color}"/>'
-                )
-    rects.append("</g>")
-    out.append("".join(rects))
+    p_x = PAD + max(0, int((wm_w - pw_w) / 2))
+    p_y = PAD + 13 + len(wordmark) * LINE + 4
+    portrait = [f'<text font-size="{PORTRAIT_FONT}" fill="{t["head"]}">']
+    for i, line in enumerate(PORTRAIT):
+        portrait.append(f'<tspan x="{p_x}" y="{p_y + i * PORTRAIT_LINE}">{esc(line)}</tspan>')
+    portrait.append("</text>")
+    out.append("".join(portrait))
 
-    press_y = sp_y + len(SPRITE) * SPRITE_PX + 22
+    press_y = p_y + len(PORTRAIT) * PORTRAIT_LINE + 20
     out.append(f'<text x="{PAD}" y="{press_y}" class="muted">PRESS START</text>')
+
 
     y = PAD + 13
     for kind, payload in rows:
@@ -189,16 +158,6 @@ def render(theme_name):
             out.append(field(y, payload[0], payload[1], t))
         elif kind == "contact":
             out.append(header(y, "Contact", t))
-        elif kind == "stats":
-            out.append(header(y, "GitHub Stats", t))
-        elif kind == "statline":
-            left, right = payload
-            parts = []
-            if left:
-                parts.append(field(y, left[0], left[1], t, vx=VALUE_X))
-            if right:
-                parts.append(field(y, right[0], right[1], t, x=VALUE_X + 40, vx=VALUE_X + 220))
-            out.append("".join(parts))
         elif kind == "prompt":
             out.append(
                 f'<text x="{ART_W + 30}" y="{y}" class="value">&gt; '
@@ -209,7 +168,8 @@ def render(theme_name):
         y += LINE
 
     out.append("</svg>")
-    return "\n".join(out) + "\n"
+    height = max(PAD * 2 + LINE * len(rows) + 6, press_y + 14 + PAD)
+    return "\n".join(out).replace("@HEIGHT@", str(height)) + "\n"
 
 
 for name in THEMES:
