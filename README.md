@@ -16,8 +16,6 @@
 
 - [football-analytics-dbt](https://github.com/Theofilosan/football-analytics-dbt): StatsBomb open data, DuckDB, dbt, Evidence dashboard
 - [fpl-agent](https://github.com/Theofilosan/fpl-agent): Fantasy Premier League analysis CLI
-- [theofilosan.github.io](https://theofilosan.github.io): my portfolio and CV
-- [shipment-analytics](https://github.com/Theofilosan/shipment-analytics): synthetic shipment data, DuckDB, dbt, Airflow (on hold)
 
 ## Tools
 
