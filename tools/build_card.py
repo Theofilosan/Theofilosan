@@ -20,6 +20,40 @@ PAD = 24
 ART_W = 340  # right column starts after this
 VALUE_X = 610  # where field values begin
 
+# Squirtle pixel sprite: blue rounded bald head, big eyes, cream belly,
+# brown shell rim, curled blue tail. Original drawing, one char per pixel.
+SPRITE = """........oooooo........
+......oobbbbbboo......
+.....obbbbbbbbbbo.....
+....obbbbbbbbbbbbo....
+...obbbbwebbbwebbbbo..
+...obbbbeebbbeeebbo...
+....obbbbbbbbbbbbo....
+....obbbeeeeebbbo.....
+.....oobbbbbbboo......
+..oaasssssssssssaao...
+.oaascccccccccccsaao..
+..oscccccccccccccso...
+..oscccccccccccso.tt..
+..oscccccccccccso.twt.
+...oscccccccccsostt...
+....ossssssssso.......
+.....bb......bb.......
+....obbo....obbo......""".splitlines()
+
+SPRITE_PAL = {
+    "o": "#17344d",  # outline
+    "b": "#5cc0f0",  # squirtle blue
+    "e": "#12242f",  # eyes / mouth
+    "w": "#ffffff",  # eye shine
+    "s": "#a8642f",  # shell brown
+    "c": "#f8ecc9",  # cream belly
+    "a": "#5cc0f0",  # arms
+    "t": "#5cc0f0",  # tail
+}
+SPRITE_PX = 9
+
+
 IDENTITY = [
     ("Role", "Platform & Cloud Engineer"),
     ("Host", "Copenhagen, Denmark"),
@@ -116,13 +150,34 @@ def render(theme_name):
         f'<rect width="{width}" height="{height}" fill="{t["bg"]}" rx="14" stroke="{t["border"]}"/>',
     ]
 
-    # ascii art, one tspan per line, palette cycles down the rows
+    # THEO wordmark: text lines with the palette gradient, then the
+    # Squirtle sprite as crisp-edged pixel rects, then PRESS START.
+    wordmark = [l for l in ART if l.strip() and "PRESS" not in l]
     art = ['<text font-size="13">']
-    for i, line in enumerate(ART):
+    for i, line in enumerate(wordmark):
         color = t["art"][i % len(t["art"])]
         art.append(f'<tspan x="{PAD}" y="{PAD + 13 + i * LINE}" fill="{color}">{esc(line)}</tspan>')
     art.append("</text>")
     out.append("".join(art))
+
+    wm_w = max(len(l) for l in wordmark) * CHAR
+    sp_w = max(len(l) for l in SPRITE) * SPRITE_PX
+    sp_x = PAD + max(0, int((wm_w - sp_w) / 2))
+    sp_y = PAD + 13 + len(wordmark) * LINE + 6
+    rects = ['<g shape-rendering="crispEdges">']
+    for sy, line in enumerate(SPRITE):
+        for sx, ch in enumerate(line):
+            color = SPRITE_PAL.get(ch)
+            if color:
+                rects.append(
+                    f'<rect x="{sp_x + sx * SPRITE_PX}" y="{sp_y + sy * SPRITE_PX}" '
+                    f'width="{SPRITE_PX}" height="{SPRITE_PX}" fill="{color}"/>'
+                )
+    rects.append("</g>")
+    out.append("".join(rects))
+
+    press_y = sp_y + len(SPRITE) * SPRITE_PX + 22
+    out.append(f'<text x="{PAD}" y="{press_y}" class="muted">PRESS START</text>')
 
     y = PAD + 13
     for kind, payload in rows:
