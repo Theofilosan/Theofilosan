@@ -7,6 +7,11 @@
 
 <p align="left"><a href="https://theofilosan.github.io"><picture><source media="(prefers-color-scheme: dark)" srcset="link_portfolio_dark.svg"><img alt="Portfolio" width="33.3%" src="link_portfolio_light.svg"></picture></a><a href="https://www.linkedin.com/in/theophilos-anastasiadis"><picture><source media="(prefers-color-scheme: dark)" srcset="link_linkedin_dark.svg"><img alt="LinkedIn" width="33.3%" src="link_linkedin_light.svg"></picture></a><a href="mailto:theofilosan@gmail.com"><picture><source media="(prefers-color-scheme: dark)" srcset="link_email_dark.svg"><img alt="Email" width="33.3%" src="link_email_light.svg"></picture></a></p>
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="pacman_dark.svg">
+  <img alt="Pac-Man eating my contribution graph" src="pacman_light.svg">
+</picture>
+
 ## What I'm working on
 
 - [football-analytics-dbt](https://github.com/Theofilosan/football-analytics-dbt): StatsBomb open data, DuckDB, dbt, Evidence dashboard
