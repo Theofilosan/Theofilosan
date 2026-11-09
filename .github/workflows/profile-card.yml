@@ -52,6 +52,9 @@ jobs:
       - name: Rebuild the link buttons
         run: python tools/build_links.py
 
+      - name: Rebuild the Pac-Man board
+        run: python tools/build_pacman.py
+
       # The card is a deterministic build output, so replaying it on top of
       # anything that landed mid-run is always safe.
       - name: Rebase onto any commits that landed meanwhile
