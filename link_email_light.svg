@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="56" font-family="'IBM Plex Mono',Consolas,Menlo,monospace" role="img" aria-label="EMAIL">
+<rect x="1" y="1" width="298" height="48" rx="7" fill="#f6f8fa" stroke="#b0449b" stroke-width="2"/>
+<rect x="1" y="47" width="298" height="8" rx="4" fill="#b0449b" opacity="0.45"/>
+<rect x="18" y="20" width="18" height="13" fill="none" stroke="#b0449b" stroke-width="2"/><polyline points="18,21 27,28 36,21" fill="none" stroke="#b0449b" stroke-width="2"/>
+<text x="48" y="33" font-size="15" font-weight="bold" letter-spacing="2" fill="#b0449b">EMAIL</text>
+</svg>
